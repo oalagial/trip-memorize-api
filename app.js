@@ -79,6 +79,25 @@ app.post("/upload", (req, res) => {
   });
 });
 
+// Define your video file path
+
+// Create an endpoint for downloading the video file
+app.get("/video", (req, res) => {
+  // Call the generateVideoFunc() with a callback function that sends the video file
+  generateVideoFunc((videoFilePath) => {
+    // Use the sendFile() method to send the video file to the client
+    res.sendFile(videoFilePath, (err) => {
+      if (err) {
+        // Handle any errors that may occur
+        console.error(err);
+        res.status(err.status).end();
+      } else {
+        console.log(`Sent video file: ${videoFilePath}`);
+      }
+    });
+  });
+});
+
 app.get("/api", (req, res) => {
   res.send("Hello, world!");
 });
