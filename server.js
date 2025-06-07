@@ -4,22 +4,22 @@ const path = require("path");
 const cors = require("cors");
 const { generateVideoFunc } = require("./generateVideo.js");
 
-const app = express();
-// app.use(cors());
-// app.use(
+const server = express();
+// server.use(cors());
+// server.use(
 //   cors({
 //     origin: "*",
 //     methods: ["GET", "PUT", "POST", "DELETE"],
 //   })
 // );
-// app.use(
+// server.use(
 //   cors({
 //     origin: ["http://localhost:3000", "https://*.ngrok.io"],
 //     methods: ["GET", "PUT", "POST", "DELETE"],
 //   })
 // );
 // // Enable CORS
-app.use(function (req, res, next) {
+server.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
   res.header(
@@ -63,7 +63,7 @@ const upload = multer({
 }).any();  // the name of the file input field in the HTML form
 
 // Route to handle image uploads
-app.post("/upload", (req, res) => {
+server.post("/upload", (req, res) => {
   console.log("upload");
   upload(req, res, (err) => {
     if (err) {
@@ -82,7 +82,7 @@ app.post("/upload", (req, res) => {
 // Define your video file path
 
 // Create an endpoint for downloading the video file
-app.get("/video", (req, res) => {
+server.get("/video", (req, res) => {
   generateVideoFunc((videoFilePath) => {
     if (!videoFilePath) {
       return res.status(500).send("Video generation failed.");
@@ -98,12 +98,12 @@ app.get("/video", (req, res) => {
   });
 });
 
-app.get("/api", (req, res) => {
+server.get("/api", (req, res) => {
   console.log("api");
   res.send("Hello, world!");
 });
 
 // Start the server
-app.listen(4000, () => {
+server.listen(4000, () => {
   console.log("Server listening on port 4000");
 });
