@@ -2,7 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
-const { generateVideoFunc } = require("./generateVideo.js");
+const videoController = require("./controllers/videoController");
 
 const server = express();
 // server.use(cors());
@@ -79,24 +79,8 @@ server.post("/upload", (req, res) => {
   });
 });
 
-// Define your video file path
-
 // Create an endpoint for downloading the video file
-server.get("/video", (req, res) => {
-  generateVideoFunc((videoFilePath) => {
-    if (!videoFilePath) {
-      return res.status(500).send("Video generation failed.");
-    }
-    res.sendFile(videoFilePath, (err) => {
-      if (err) {
-        console.error(err);
-        res.status(err.status || 500).end();
-      } else {
-        console.log(`Sent video file: ${videoFilePath}`);
-      }
-    });
-  });
-});
+server.get("/video", videoController.getVideo);
 
 server.get("/api", (req, res) => {
   console.log("api");

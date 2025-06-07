@@ -21,8 +21,7 @@ dist/
 build/
 
 # Uploaded and processed images
-Images/
-resized_images/
+storage/
 
 # VSCode
 .vscode/
