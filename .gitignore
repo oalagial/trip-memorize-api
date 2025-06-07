@@ -20,6 +20,10 @@ dist/
 # Build output
 build/
 
+# Uploaded and processed images
+Images/
+resized_images/
+
 # VSCode
 .vscode/
 

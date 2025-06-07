@@ -4,6 +4,7 @@ const ffmpeg = require("fluent-ffmpeg");
 const videoshow = require("videoshow");
 const path = require("path");
 const fs = require("fs");
+const sharp = require("sharp");
 
 const ffmpegPath = f1.path;
 const ffprobePath = f2.path;
@@ -11,25 +12,59 @@ const ffprobePath = f2.path;
 ffmpeg.setFfprobePath(ffprobePath);
 ffmpeg.setFfmpegPath(ffmpegPath);
 
-function generateVideoFunc(callback) {
-  const imagesDir = "./Images";
+async function clearFolder(folderPath) {
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath);
+    return;
+  }
+  const files = fs.readdirSync(folderPath);
+  for (const file of files) {
+    fs.unlinkSync(path.join(folderPath, file));
+  }
+}
 
+async function resizeImages(imagesDir, outputDir, width, height) {
+  await clearFolder(outputDir);
+  const files = fs.readdirSync(imagesDir);
+  for (const file of files) {
+    const ext = path.extname(file).toLowerCase();
+    if ([".jpg", ".jpeg", ".png", ".gif"].includes(ext)) {
+      const filePath = path.join(imagesDir, file);
+      const outputPath = path.join(outputDir, file);
+      await sharp(filePath).resize(width, height).toFile(outputPath);
+    }
+  }
+}
+
+async function generateVideoFunc(callback) {
+  const imagesDir = "./Images";
+  const resizedDir = "./resized_images";
+
+  // Resize all images into resized_images folder
+  await resizeImages(imagesDir, resizedDir, 640, 480);
+
+  // Use only resized images
   const images = fs
-    .readdirSync(imagesDir)
+    .readdirSync(resizedDir)
     .filter((file) => {
-      const extension = path.extname(file);
+      const extension = path.extname(file).toLowerCase();
       return [".jpg", ".jpeg", ".png", ".gif"].includes(extension);
     })
-    .map((file) => path.join(imagesDir, file));
+    .map((file) => path.join(resizedDir, file));
+
+  if (images.length === 0) {
+    console.error("No images found in resized_images directory.");
+    return callback(null);
+  }
 
   const videoOptions = {
     fps: 25,
-    loop: 5, // seconds
+    loop: 5,
     transition: true,
-    transitionDuration: 1, // seconds
+    transitionDuration: 1,
     videoBitrate: 1024,
     videoCodec: "libx264",
-    size: "640x?",
+    size: "640x480",
     audioBitrate: "128k",
     audioChannels: 2,
     format: "mp4",
@@ -39,7 +74,6 @@ function generateVideoFunc(callback) {
   const videoFilePath = path.join(__dirname, "generatedVideo.mp4");
 
   videoshow(images, videoOptions)
-    //   .audio("audio.mp3")
     .save("generatedVideo.mp4")
     .on("start", function (command) {
       console.log("ffmpeg process started:", command);
@@ -52,7 +86,6 @@ function generateVideoFunc(callback) {
       console.error("Video created in:", output);
       callback(videoFilePath);
     });
-  // Call the callback function with the path to the video file
 }
 
 module.exports = {

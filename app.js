@@ -60,7 +60,7 @@ const upload = multer({
       cb(new Error("Invalid file type"));
     }
   },
-}).single("image"); // the name of the file input field in the HTML form
+}).any();  // the name of the file input field in the HTML form
 
 // Route to handle image uploads
 app.post("/upload", (req, res) => {
@@ -83,14 +83,14 @@ app.post("/upload", (req, res) => {
 
 // Create an endpoint for downloading the video file
 app.get("/video", (req, res) => {
-  // Call the generateVideoFunc() with a callback function that sends the video file
   generateVideoFunc((videoFilePath) => {
-    // Use the sendFile() method to send the video file to the client
+    if (!videoFilePath) {
+      return res.status(500).send("Video generation failed.");
+    }
     res.sendFile(videoFilePath, (err) => {
       if (err) {
-        // Handle any errors that may occur
         console.error(err);
-        res.status(err.status).end();
+        res.status(err.status || 500).end();
       } else {
         console.log(`Sent video file: ${videoFilePath}`);
       }
@@ -99,10 +99,11 @@ app.get("/video", (req, res) => {
 });
 
 app.get("/api", (req, res) => {
+  console.log("api");
   res.send("Hello, world!");
 });
 
 // Start the server
-app.listen(3000, () => {
-  console.log("Server listening on port 3000");
+app.listen(4000, () => {
+  console.log("Server listening on port 4000");
 });
