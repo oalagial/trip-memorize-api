@@ -32,7 +32,7 @@ server.use(function (req, res, next) {
 // Set up storage location and file name
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "Images/");
+    cb(null, "storage/uploaded_images");
   },
   filename: (req, file, cb) => {
     cb(null, `${file.originalname}`);
@@ -81,6 +81,7 @@ server.post("/upload", (req, res) => {
 
 // Create an endpoint for downloading the video file
 server.get("/video", videoController.getVideo);
+server.get("/generate_fancy_video", videoController.getFancyVideo);
 
 server.get("/api", (req, res) => {
   console.log("api");
